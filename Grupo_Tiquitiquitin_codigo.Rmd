@@ -1,0 +1,382 @@
+---
+title: "Grupo_Tiquitiquitin_code"
+author: "Encalada,M. Meza, I. Monsón, H. Montenegro, B, y Navarro, J."
+date: "2025-07-14"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+## Titulo ¿Más candidatos es mejor? El impacto de la oferta electoral en la emisión de votos válidos: un experimento en Perú
+
+## Introducción
+
+Este documento presenta el análisis de un experimento diseñado para
+evaluar el efecto de la **oferta electoral** sobre la emisión de votos
+válidos. El objetivo principal es examinar si el número de candidaturas
+presidenciales influye en la probabilidad de emitir un voto inválido.
+
+## Hipótesis
+
+**Hipótesis principal:**\
+A mayor número de candidatos, mayor será la proporción de votos
+inválidos.
+
+## Variables clave
+
+-   **Variable dependiente:** Voto inválido (intención de voto no válida
+    o no emitida).
+
+-   **Variable independiente:** Oferta electoral, definida como el
+    número y la diversidad de candidaturas presidenciales disponibles.
+    En el diseño experimental se operacionaliza en tres niveles:
+
+    -   **Tratamiento 1 (baja oferta):** 9 partidos
+    -   **Control (oferta media):** 18 partidos
+    -   **Tratamiento 2 (alta oferta):** 36 partidos
+
+## Replicación del análisis en R
+
+A continuación, se presenta el código en R necesario para replicar el
+análisis realizado. El proceso se detalla paso a paso.
+
+------------------------------------------------------------------------
+
+### Cargar base de datos:
+
+```{r}
+library(readr)
+POL331_etiquetas <- read_csv("C:/Users/ivann/OneDrive/Escritorio/POL331_etiquetas.csv") 
+```
+
+### Limpiar base de datos:
+
+```{r}
+#Eliminar las dos primeras filas que solo son etiqueta
+
+POL331_etiquetas <- POL331_etiquetas[-c(1, 2), ]
+
+```
+
+### Filtrar variables relevantes
+
+```{r}
+# Ver nombres de columnas
+names(POL331_etiquetas)
+```
+
+```{r}
+vars_filtradas <- c("consent", "edad", "genero", "ocup", "edu",
+                    "vot21", "vot22", "vot26_a36", "novot", "difvoto",
+                    "intvot", "reprevot", "vot26_check2", "TT2_DO", "Q26_1")
+
+POL331_subset <- POL331_etiquetas[, vars_filtradas]
+
+names(POL331_subset)
+
+```
+
+### Estructura de las variables:
+
+```{r}
+str(POL331_subset)
+```
+
+### Recodificar variables:
+
+```{r}
+# Convertir a factor
+library(dplyr)
+
+POL331_subset <- POL331_subset %>%
+  mutate(
+    consent     = as.factor(consent),
+    edad        = as.numeric(edad),
+    genero      = as.factor(genero),
+    ocup        = as.factor(ocup),
+    edu         = as.factor(edu),
+    vot21       = as.factor(vot21),
+    vot22       = as.factor(vot22),
+    vot26_a36   = as.factor(vot26_a36),
+    novot       = as.factor(novot),
+    difvoto     = as.factor(difvoto),
+    intvot      = as.factor(intvot),
+    reprevot    = as.factor(reprevot),
+    vot26_check2= as.factor(vot26_check2),
+    TT2_DO      = as.factor(TT2_DO),
+    Q26_1       = as.factor(Q26_1)
+  )
+
+str(POL331_subset)
+
+```
+
+## VARIABLES 
+
+**Dependiente:** Tratamiento ("experimento")
+
+1.  Tratamiento_9 = 9 candidatos
+
+2.  Control_18 = 18 candidatos
+
+3.  Tratamiento_36 = 36 candidatos
+
+```{r}
+unique(POL331_subset$TT2_DO)
+table(POL331_subset$TT2_DO)
+```
+
+### Crear la nueva variable: experimento
+
+```{r}
+#install.packages("dplyr")
+library(dplyr)
+
+# Filtrar NA y crear variable 'experimento'
+POL331_subset <- POL331_subset %>%
+  filter(!is.na(TT2_DO)) %>%
+  mutate(
+    experimento = case_when(
+      TT2_DO == "Q18" ~ "Tratamiento_9",  # 9 candidatos - baja oferta
+      TT2_DO == "Q20" ~ "Tratamiento_36",  # 36 candidatos - alta oferta
+      TT2_DO == "Q19" ~ "Control_18" # 18 candidatos - media oferta (promedio)
+    ),
+    experimento = factor(experimento, levels = c("Control_18", "Tratamiento_9", "Tratamiento_36"))
+  )
+```
+
+### Descripción: tabla de frecuencias
+
+```{r}
+# Frecuencia absoluta
+table(POL331_subset$experimento)
+
+# Frecuencia relativa (porcentaje)
+prop.table(table(POL331_subset$experimento)) * 100
+
+```
+
+```{r}
+# Tabla con n y porcentaje (con un decimal)
+tabla_tratamiento <- as.data.frame(table(POL331_subset$experimento)) %>%
+  rename(Tratamiento = Var1, n = Freq) %>%
+  mutate(Porcentaje = round(100 * n / sum(n), 1))
+
+# Ver tabla
+tabla_tratamiento
+```
+
+### Grafico de barras:
+
+```{r}
+library(ggplot2)
+
+# Gráfico en blanco y negro con % dentro de la barra
+trat_graph <- ggplot(tabla_tratamiento, aes(x = Tratamiento, y = n)) +
+  geom_bar(stat = "identity", fill = "white", color = "black", width = 0.6) +
+  
+  # Porcentaje dentro de la barra
+  geom_text(aes(label = paste0(Porcentaje, "%")),
+            vjust = 1.5, color = "black", size = 4.2, family = "serif") +
+
+  # n debajo del nombre de la categoría (como subtítulo)
+  geom_text(aes(y = 0, label = paste0("n = ", n)),
+            vjust = -1.5, size = 3.8, family = "serif", fontface = "italic") +
+  
+  labs(
+    title = "Distribución de participantes por grupo experimental",
+    x = "Grupo de tratamiento",
+    y = "Frecuencia (n)"
+  ) +
+  ylim(0, max(tabla_tratamiento$n) * 1.2) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 13, face = "bold"),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10),
+    legend.position = "none"
+  )
+trat_graph
+```
+
+```{r}
+ggsave("grafico_tratamiento.png", trat_graph, dpi = 300, width = 6, height = 4)
+
+```
+
+## Comprobarndo el tratamiento
+
+-   **Variable:** vot26_check2
+
+VOT26_CHECK2. Usando una escala que va del 1 al 5, donde 1 significa
+“Muy cargado” y 5 significa “Muy simple”. Puede usar cualquier número
+entre 1 y 5. ¿Qué tan cargada o saturada sentiste la cartilla electoral
+que acabas de ver? Muy cargada Algo cargada Ni cargada ni simple Algo
+simple Muy simple
+
+```{r}
+table(POL331_subset$vot26_check2)
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+
+# Crear variable 'aplicacion' limpiando los valores de 'vot26_check2'
+POL331_subset <- POL331_subset %>%
+  mutate(
+    aplicacion = str_remove(vot26_check2, "^[0-9]+\\.\\s*"),
+    aplicacion = str_trim(aplicacion),  # Elimina espacios extra si hubiera
+    aplicacion = factor(aplicacion, 
+                        levels = c("Muy cargada", "Algo cargada", "Ni cargada ni simple", 
+                                   "Algo simple", "Muy simple"))
+  )
+table (POL331_subset$aplicacion )
+```
+
+### Tabla cruzada con "experimento": absolutos y porcentaje
+
+#### 1. Gráfico
+
+```{r}
+library(janitor)
+
+# Tabla cruzada con porcentajes por columna (por tratamiento)
+POL331_subset %>%
+  tabyl(aplicacion, experimento) %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()
+
+```
+
+```{r}
+library(dplyr)
+
+# Paso 1: Crear los datos de proporciones
+datos_apilados <- POL331_subset %>%
+  filter(!is.na(aplicacion), !is.na(experimento)) %>%
+  group_by(experimento, aplicacion) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(experimento) %>%
+  mutate(
+    porcentaje = round(n / sum(n) * 100, 1),
+    etiqueta = ifelse(porcentaje == max(porcentaje), paste0(porcentaje, "%"), NA)
+  )
+
+```
+
+```{r}
+library(ggplot2)
+
+# Paso 2: Gráfico apilado en blanco y negro
+app <- ggplot(datos_apilados, aes(x = experimento, y = porcentaje, fill = aplicacion)) +
+  geom_bar(stat = "identity", color = "black", width = 0.6) +
+  scale_fill_grey(start = 0.9, end = 0.3) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  geom_text(aes(label = etiqueta), 
+            position = position_stack(vjust = 0.5), 
+            size = 4, color = "black", family = "serif") +
+  labs(
+    title = "Percepción de carga de la oferta electoral según tratamiento",
+    x = "Grupo experimental",
+    y = "Porcentaje (%)",
+    fill = "Percepción de carga"
+  ) +
+  theme_minimal(base_family = "serif") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10),
+    legend.title = element_text(size = 11),
+    legend.text = element_text(size = 10)
+  )
+
+app
+```
+
+```{r}
+ggsave("grafico_barras_apiladas.png", plot = app, width = 8, height = 6)
+
+```
+
+```{r}
+library(dplyr)
+
+POL331_subset <- POL331_subset %>%
+  mutate(
+    voto_invalido = case_when(
+      vot26_a36 == "No" ~ 1,   # No votó → voto inválido / no emitido
+      vot26_a36 == "Sí" ~ 0,   # Sí votó → voto válido / emitido
+      TRUE ~ NA_real_
+    ),
+    voto_invalido = factor(voto_invalido, levels = c(0,1),
+                           labels = c("Voto válido", "No vota"))
+  )
+
+# Ver la distribución
+table(POL331_subset$voto_invalido)
+prop.table(table(POL331_subset$voto_invalido)) * 100
+
+```
+
+```{r}
+#VI binaria para correr modelo
+POL331_subset <- POL331_subset %>%
+  mutate(voto_invalido_num = ifelse(voto_invalido == "No vota", 1, 0))
+```
+
+## MODELO LOGIT
+
+```{r}
+modelo_logit_simple <- glm(
+  voto_invalido_num ~ experimento,
+  data = POL331_subset,
+  family = "binomial"
+)
+
+summary(modelo_logit_simple)
+
+```
+
+```{r}
+library(gt)
+library(broom)
+library(dplyr)
+
+# Crear la tabla de resultados
+tabla_modelo <- tidy(modelo_logit_simple, exponentiate = TRUE, conf.int = TRUE) %>%
+  mutate(
+    estimate = round(estimate, 2),
+    std.error = round(std.error, 2),
+    conf.low = round(conf.low, 2),
+    conf.high = round(conf.high, 2),
+    p.value = round(p.value, 3),
+    `IC 95%` = paste0("[", conf.low, ", ", conf.high, "]")
+  ) %>%
+  select(term, estimate, std.error, `IC 95%`, p.value) %>%
+  rename(
+    Variable = term,
+    `Odds Ratio` = estimate,
+    `Error Estándar` = std.error,
+    `p-valor` = p.value
+  )
+
+# Convertir en tabla gt
+tabla_gt <- tabla_modelo %>%
+  gt() %>%
+  tab_header(
+    title = md("**Tabla 2. Resultados del modelo logístico**"),
+    subtitle = "Probabilidad de no emitir voto según número de candidatos"
+  ) %>%
+  tab_source_note(
+    source_note = md("Fuente: Elaboración del Grupo TiquiTiquiTin con base en datos experimentales (2025).")
+  )
+```
+
+```{r}
+tabla_gt
+
+```
