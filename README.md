@@ -12,9 +12,8 @@ Este repositorio contiene el código fuente y los datos necesarios para reproduc
 1. Instala R y RStudio.
 2. Instala los paquetes necesarios (ver al inicio del Rmd).
 3. Abre `Grupo_Tiquitiquitin_codigo.Rmd` en RStudio.
-4. Haz click en `Knit` para reproducir todo el documento.
 
 ## Autoría
 
-Realizado por Michael Encalada, Ivanna Meza,  Montenegro, Hadaly Monzón, y Jose Navarro. (2025)
+Realizado por Michael Encalada, Ivanna Meza, Brandon Montenegro, Hadaly Monzón, y Jose Navarro. (2025)
 
