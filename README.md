@@ -1,4 +1,3 @@
-<img width="725" height="747" alt="image" src="https://github.com/user-attachments/assets/95ce59d5-b44b-4176-b67e-df165600a3d5" /># M-todos-Experimentales
 # Experimento sobre oferta electoral y la emisión de votos válidos en Perú
 
 Este repositorio contiene el código fuente y los datos necesarios para reproducir el experimento descrito en ¿Más partidos es mejor? El impacto de la oferta electoral en la emisión de votos válidos: un experimento en Perú. El diseño se implementó en Qualtrics y el análisis se realizó en RStudio mediante un script en R Markdown.
