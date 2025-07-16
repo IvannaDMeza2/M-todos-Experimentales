@@ -4,7 +4,7 @@
 Este repositorio contiene el código fuente y los datos necesarios para reproducir el experimento descrito en [TÍTULO DEL PAPER / TESIS]. El diseño se implementó en Qualtrics y el análisis se realizó en RStudio mediante un script en R Markdown.
 
 ## Archivos
-- `experimento.Rmd`: código fuente reproducible del análisis
+- `Grupo_Tiquitiquitin_codigo.Rmd`: código fuente reproducible del análisis
 - `datos.csv`: base de datos anonimizados
 - `experimento.html`: versión knit del análisis completo
 - `README.md`: este archivo
