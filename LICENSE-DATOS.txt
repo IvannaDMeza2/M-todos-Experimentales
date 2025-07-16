@@ -1,0 +1,7 @@
+Licencia de uso de datos – Proyecto experimental PUCP (2025)
+
+Esta base de datos fue recolectada colectivamente por estudiantes del curso de Métodos Cuantitativos (PUCP), coordinado por el profesor Arturo Maldonado. El uso de estos datos está limitado a fines académicos y experimentales, y no se autoriza su reproducción, difusión ni adaptación para usos comerciales ni fuera del contexto docente.
+
+Para cualquier uso adicional, contactar a los responsables del curso.
+
+© 2025, Autores del levantamiento experimental – Todos los derechos reservados.
